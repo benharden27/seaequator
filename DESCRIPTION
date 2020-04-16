@@ -1,0 +1,10 @@
+Package: seaequator
+Type: Package
+Title: Data From Cruises by the Sea Education Association from the Equatorial Region 
+Version: 0.1.0
+Author: person("Ben", "Harden", email = "bharden@sea.edu", role = c("aut", "cre"))
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: Data from over 20 cruises with equatorial crossings
+License: Free
+Encoding: UTF-8
+LazyData: true
