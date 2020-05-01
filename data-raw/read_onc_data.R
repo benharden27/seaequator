@@ -25,19 +25,30 @@ for (i in 1:length(subfolders)) {
 
   # a$adcp$u <- ifelse(a$adcp$u>1,NA,a$adcp$u)
   # a$adcp$v <- ifelse(a$adcp$v>1,NA,a$adcp$v)
+
   for (j in 1:length(a$ctd)) {
-    # find possible oxygen values
-    ii <- stringr::str_which(names(a$ctd[[j]]@data),"oxygen")
-    if(length(ii) > 1) {
-      mean_o2 <- colMeans(sapply(a$ctd[[j]]@data[ii], unlist),na.rm = T)
+    all_fields <- names(a$ctd[[j]]@metadata$dataNamesOriginal)
+    ii <- stringr::str_which(all_fields,"oxygen")
+    if(length(ii)>0) {
+      for (iii in ii) {
+        original <- a$ctd[[j]]@metadata$dataNamesOriginal[[iii]]
+        if(stringr::str_detect(original,"sbeox0Mm")) {
+          oxygen_mM <- a$ctd[[j]]@data[[iii]]
+        } else {
+          oxygen_mM <- NA
+        }
+        if(stringr::str_detect(original,"sbeox0ML")) {
+          oxygen_mL <- a$ctd[[j]]@data[[iii]]
+        } else {
+          oxygen_mL <- NA
+        }
+      }
     } else {
-      mean_o2 <- mean(a$ctd[[j]]@data[ii], na.rm = T)
+      oxygen_mM <- oxygen_mL <- NA
     }
-    oval <- ii[which(mean_o2 < 10)][1]
-    if(is.na(oval)) {
-      oval <- ii[1]
-      a$ctd[[j]]@data[[oval]] <- NA
-    }
+
+    a$ctd[[j]]@data$oxygen <- oxygen_mM
+    a$ctd[[j]]@data$oxygen2 <- oxygen_mL
 
     if(is.null(a$ctd[[j]]@data$par)) {
       par = NA
@@ -51,6 +62,18 @@ for (i in 1:length(subfolders)) {
     if(is.null(a$ctd[[j]]@data$theta)) {
       a$ctd[[j]]@data$theta <- oce::swTheta(a$ctd[[j]]@data$salinity,a$ctd[[j]]@data$temperature,
                                             a$ctd[[j]]@data$pressure)
+    }
+
+    ii <- stringr::str_which(all_fields,"fluor")
+    if(length(ii) > 0) {
+      for (iii in ii) {
+        original <- a$ctd[[j]]@metadata$dataNamesOriginal[[iii]]
+        if(stringr::str_detect(original,"flSP")) {
+          a$ctd[[j]]@data$fluorescence <- a$ctd[[j]]@data[[iii]]
+        } else {
+          a$ctd[[j]]@data[[iii]] <- NA
+        }
+      }
     }
 
     if(is.null(a$ctd[[j]]@data$fluorescence)) {
@@ -67,7 +90,8 @@ for (i in 1:length(subfolders)) {
                       sal = a$ctd[[j]]@data$salinity,
                       fluor = a$ctd[[j]]@data$fluorescence,
                       par = par,
-                      oxygen = a$ctd[[j]]@data[[oval]],
+                      oxygen = a$ctd[[j]]@data$oxygen,
+                      oxygen2 = a$ctd[[j]]@data$oxygen2,
                       lon = a$ctd[[j]]@metadata$longitude,
                       lat = a$ctd[[j]]@metadata$latitude,
                       station = station,
