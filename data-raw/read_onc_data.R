@@ -27,24 +27,21 @@ for (i in 1:length(subfolders)) {
   # a$adcp$v <- ifelse(a$adcp$v>1,NA,a$adcp$v)
 
   for (j in 1:length(a$ctd)) {
+
     all_fields <- names(a$ctd[[j]]@metadata$dataNamesOriginal)
     ii <- stringr::str_which(all_fields,"oxygen")
+    oxygen_mL <- NA
+    oxygen_mM <- NA
     if(length(ii)>0) {
       for (iii in ii) {
         original <- a$ctd[[j]]@metadata$dataNamesOriginal[[iii]]
         if(stringr::str_detect(original,"sbeox0Mm")) {
           oxygen_mM <- a$ctd[[j]]@data[[iii]]
-        } else {
-          oxygen_mM <- NA
         }
         if(stringr::str_detect(original,"sbeox0ML")) {
           oxygen_mL <- a$ctd[[j]]@data[[iii]]
-        } else {
-          oxygen_mL <- NA
         }
       }
-    } else {
-      oxygen_mM <- oxygen_mL <- NA
     }
 
     a$ctd[[j]]@data$oxygen <- oxygen_mM
@@ -84,18 +81,19 @@ for (i in 1:length(subfolders)) {
       a$ctd[[j]]@data$oxygen <- NA
     }
     ctd_add <- tibble::tibble(dep = a$ctd[[j]]@data$depth,
-                      temp = a$ctd[[j]]@data$temperature,
-                      theta = a$ctd[[j]]@data$theta,
-                      sigtheta = a$ctd[[j]]@data$sigmaTheta,
-                      sal = a$ctd[[j]]@data$salinity,
-                      fluor = a$ctd[[j]]@data$fluorescence,
-                      par = par,
-                      oxygen = a$ctd[[j]]@data$oxygen,
-                      oxygen2 = a$ctd[[j]]@data$oxygen2,
-                      lon = a$ctd[[j]]@metadata$longitude,
-                      lat = a$ctd[[j]]@metadata$latitude,
-                      station = station,
-                      cruise = subfolders[i])
+                              pres = a$ctd[[j]]@data$pressure,
+                              temp = a$ctd[[j]]@data$temperature,
+                              theta = a$ctd[[j]]@data$theta,
+                              sigtheta = a$ctd[[j]]@data$sigmaTheta,
+                              sal = a$ctd[[j]]@data$salinity,
+                              fluor = a$ctd[[j]]@data$fluorescence,
+                              par = par,
+                              oxygen = a$ctd[[j]]@data$oxygen,
+                              oxygen2 = a$ctd[[j]]@data$oxygen2,
+                              lon = a$ctd[[j]]@metadata$longitude,
+                              lat = a$ctd[[j]]@metadata$latitude,
+                              station = station,
+                              cruise = subfolders[i])
     if (j == 1){
       ctd <- ctd_add
     } else {
